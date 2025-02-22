@@ -1,19 +1,44 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable } from '@nestjs/common';
 import { CreateWalletAssetDto } from '../dto/create-walletAsset.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import mongoose, { Model } from 'mongoose';
 import { WalletAsset } from '../entities/walletAsset.entity';
+import { Wallet } from '../entities/wallet.entity';
 
 @Injectable()
 export class WalletAssetsService {
   constructor(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     @InjectModel(WalletAsset.name)
     private walletAssetSchema: Model<WalletAsset>,
+    @InjectModel(Wallet.name) private walletSchema: Model<Wallet>,
+    @InjectConnection() private connection: mongoose.Connection,
   ) {}
 
-  create(createWalletAssetDto: CreateWalletAssetDto) {
-    return this.walletAssetSchema.create(createWalletAssetDto);
+  async create(createWalletAssetDto: CreateWalletAssetDto) {
+    const session = await this.connection.startSession();
+    // eslint-disable-next-line @typescript-eslint/await-thenable
+    await session.startTransaction();
+    try {
+      const docs = await this.walletAssetSchema.create(
+        [{ ...createWalletAssetDto }],
+        { session },
+      );
+      const walletAsset = docs[0];
+      await this.walletSchema.updateOne(
+        { _id: createWalletAssetDto.wallet },
+        { $push: { assets: walletAsset._id } },
+        { session },
+      );
+      await session.commitTransaction();
+      return walletAsset;
+    } catch (error) {
+      console.error(error);
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
   }
 
   findAll() {

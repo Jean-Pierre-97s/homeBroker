@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo
+    build: ./.docker/mongodb
     ports:
       - 27017:27017
     environment:
