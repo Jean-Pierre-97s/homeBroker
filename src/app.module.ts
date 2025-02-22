@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AssetsModule } from './modules/assets/assets.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { WalletsModule } from './modules/wallets/wallets.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { WalletsModule } from './modules/wallets/wallets.module';
     ),
     AssetsModule,
     WalletsModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
