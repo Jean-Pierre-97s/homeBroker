@@ -4,8 +4,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Wallet } from '../entities/wallet.entity';
 import { AssetPresenter } from '../../assets/presenter/asset.presenter';
-import { Asset } from 'src/modules/assets/entities/asset.entity';
 import { WalletAsset } from '../entities/walletAsset.entity';
+import { Asset } from 'src/modules/assets/entities/asset.entity';
 
 @Injectable()
 export class WalletsService {
@@ -29,9 +29,9 @@ export class WalletsService {
     // Transform the assets using the presenter
     const output = {
       ...wallet.toObject(),
-      assets: wallet.assets.map((walletAsset: WalletAsset) => ({
+      assets: wallet.assets.map((walletAsset) => ({
         ...walletAsset.toObject(),
-        asset: new AssetPresenter(walletAsset.asset as Asset).toJSON(),
+        asset: new AssetPresenter(walletAsset.asset as Asset),
       })),
     };
 
